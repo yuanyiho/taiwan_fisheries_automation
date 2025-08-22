@@ -1,15 +1,7 @@
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
 import pdf from "pdf-parse/lib/pdf-parse.js";
-import {
-  Document,
-  Packer,
-  Table,
-  TableRow,
-  TableCell,
-  Paragraph,
-  WidthType,
-} from "docx";
+import * as XLSX from "xlsx";
 
 // Sanitize filename to ASCII-only
 function sanitizeFileName(name) {
@@ -69,51 +61,35 @@ export default async function handler(req, res) {
 
     const buffer = Buffer.from(await pdfResp.arrayBuffer());
 
-    // 4. Parse PDF
+    // 5. Parse PDF
     const data = await pdf(buffer);
     const lines = data.text
       .split("\n")
       .map((l) => l.trim())
       .filter((l) => l.length > 0);
 
-    // 5. Convert to DOCX
-    const rows = lines.map(
-      (line) =>
-        new TableRow({
-          children: [
-            new TableCell({
-              children: [new Paragraph(line)],
-              width: { size: 100, type: WidthType.PERCENTAGE },
-            }),
-          ],
-        })
-    );
+    // 6. Create XLSX workbook
+    const worksheetData = lines.map(line => [line]); // Each line in one row, column A
+    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+	const dateMatch = latest.name.match(/(\d{8})/);
+	const sheetName = dateMatch ? dateMatch[1] : "Sheet1";
+	
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
-    const doc = new Document({
-      sections: [
-        {
-          children: [
-            new Table({
-              rows,
-              width: { size: 100, type: WidthType.PERCENTAGE },
-            }),
-          ],
-        },
-      ],
-    });
+    const xlsxBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
 
-    const bufferDocx = await Packer.toBuffer(doc);
-
-    // 6. Return as DOCX download
+    // 7. Return as XLSX download
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="${latest.name.replace(/\s+/g, "_")}.docx"`
+      `attachment; filename="${sanitizeFileName(latest.name)}.xlsx"`
     );
     res.setHeader(
       "Content-Type",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
-    res.send(bufferDocx);
+    res.send(xlsxBuffer);
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });

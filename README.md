@@ -92,4 +92,24 @@ function fetchFromVercel() {
   }
 
 }
+
+/**
+ * Creates a time-based trigger to run fetchFromVercel every day at 9AM
+ */
+function createDailyTrigger() {
+  // Remove previous triggers for this function
+  const triggers = ScriptApp.getProjectTriggers();
+  triggers.forEach(trigger => {
+    if (trigger.getHandlerFunction() === "fetchFromVercel") {
+      ScriptApp.deleteTrigger(trigger);
+    }
+  });
+
+  // Create new daily trigger at 9AM
+  ScriptApp.newTrigger("fetchFromVercel")
+    .timeBased()
+    .everyDays(1)
+    .atHour(9)
+    .create();
+}
 ```

@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
 import fetch from "node-fetch";
 
-// sanitize filename to ASCII-only
+// Sanitize filename to ASCII-only
 function sanitizeFileName(name) {
   return name
     .replace(/\s+/g, "_")

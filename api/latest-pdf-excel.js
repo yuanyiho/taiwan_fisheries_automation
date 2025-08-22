@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import * as cheerio from "cheerio";
-import pdf from "pdf-parse/lib/pdf-parse.js"; // ✅ correct path
+import pdf from "pdf-parse/lib/pdf-parse.js";
 import {
   Document,
   Packer,
@@ -11,7 +11,7 @@ import {
   WidthType,
 } from "docx";
 
-// sanitize filename to ASCII-only
+// Sanitize filename to ASCII-only
 function sanitizeFileName(name) {
   return name
     .replace(/\s+/g, "_")

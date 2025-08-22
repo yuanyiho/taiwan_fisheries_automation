@@ -1,6 +1,6 @@
 # Taiwan Fisheries Agency PDF Scraper
 
-This project is a **serverless scraper** deployed on Vercel that automatically fetches the **latest PDF of authorized vessels** from the Taiwan Fisheries Agency website and makes it accessible for download. It is designed to integrate seamlessly with **Google Apps Script** to save PDFs directly into Google Drive.
+This project is a **serverless scraper** deployed on Vercel that automatically fetches the **latest PDF of authorized vessels** from the Taiwan Fisheries Agency website and makes it accessible for download. It is designed to integrate seamlessly with **Google Apps Script** to save PDFs / convert into excel directly into Google Drive.
 
 ---
 
@@ -19,9 +19,10 @@ This project is a **serverless scraper** deployed on Vercel that automatically f
 ```
 taiwan_fisheries_automation
 ├─ api/
-│ └─ latest-pdf.js # Vercel serverless function
-├─ package.json # Node.js dependencies
-└─ .gitignore # Excludes node_modules and .vercel
+│ └─ latest-pdf.js
+│ └─ latest-pdf-excel.js
+├─ package.json
+└─ .gitignore
 ```
 
 ---
@@ -60,6 +61,7 @@ vercel deploy --prod
 3. Endpoint on vercel
 ```
 https://<your-project>.vercel.app/api/latest-pdf
+https://<your-project>.vercel.app/api/latest-pdf-excel
 ```
 
 ## App Script Integration

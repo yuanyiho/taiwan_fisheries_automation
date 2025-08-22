@@ -17,11 +17,12 @@ This project is a **serverless scraper** deployed on Vercel that automatically f
 ## Folder Structure
 
 taiwan_fisheries_automation
+```
 ├─ api/
 │ └─ latest-pdf.js # Vercel serverless function
 ├─ package.json # Node.js dependencies
 └─ .gitignore # Excludes node_modules and .vercel
-
+```
 
 ---
 

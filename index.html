@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Serverless API – Latest Authorized Vessels PDF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body { margin: 0; padding: 2rem; color: #0b1220; background: #f7f8fb; }
+    .card {
+      max-width: 760px; margin: 0 auto; background: #fff; border-radius: 16px;
+      box-shadow: 0 6px 30px rgba(24,39,75,.08); padding: 1.5rem 1.5rem 2rem;
+    }
+    h1 { margin: 0 0 1rem; font-size: 1.5rem; }
+    .meta { color: #4b5563; font-size: .95rem; margin-bottom: 1rem; }
+    .row { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: .5rem; }
+    a.button {
+      display: inline-block; padding: .7rem 1rem; border-radius: 10px; text-decoration: none;
+      border: 1px solid #d1d5db; background: #fff; color: #111827;
+    }
+    a.button.primary { background: #111827; color: #fff; border-color: #111827; }
+    .err { color: #b91c1c; margin-top: .75rem; }
+    code { background: #f3f4f6; padding: .2rem .4rem; border-radius: 6px; }
+    footer { text-align: center; color: #6b7280; margin-top: 2rem; font-size: .85rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Serverless API</h1>
+    <div class="meta">
+		This project is a serverless scraper deployed on Vercel that automatically fetches the latest PDF of authorized vessels from the Taiwan Fisheries Agency website and makes it accessible for download.<br>
+		It is designed to integrate seamlessly with Google Apps Script to save/ PDFs or convert into Doc directly into Google Drive.
+	</div>
+  </div>
+  <footer>
+    <p>Endpoints: <code>/api/latest-pdf</code> • <code>/api/latest-pdf-doc</code>
+  </footer>
+
+</body>
+</html>

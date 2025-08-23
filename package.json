@@ -5,7 +5,7 @@
   "dependencies": {
     "cheerio": "^1.1.2",
     "node-fetch": "^3.3.2",
-    "pdf-parse": "^1.1.1",
+    "pdf-table-extractor": "^1.0.3",
     "xlsx": "^0.18.5"
   }
 }

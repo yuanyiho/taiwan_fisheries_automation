@@ -32,7 +32,7 @@ taiwan_fisheries_automation
 1. Clone the repository:
 
 ```bash / cmd
-git clone https://github.com/<your-username>/<your-repo>.git
+git clone https://github.com/yuanyiho/taiwan_fisheries_automation.git
 cd taiwan_fisheries_automation
 ```
 

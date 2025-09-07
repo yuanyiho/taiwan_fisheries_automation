@@ -66,49 +66,98 @@ https://<your-project>.vercel.app/api/latest-pdf-excel
 
 ## App Script Integration
 ```
-function fetchFromVercel() {
-  const url = "https://<your-project>.vercel.app/api/latest-pdf"; // Replace with your deployed URL
-  const folderId = "YOUR_FOLDER_ID"; // Replace with your Drive folder ID
+function updateVesselMasterSheet() {
+  const url = "URL"; // Vercel XLSX endpoint
 
-  const folder = DriveApp.getFolderById(folderId);
-
-  // Fetch PDF
-  const resp = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-
-  // Get filename from Content-Disposition
-  const cd = resp.getHeaders()["Content-Disposition"];
-  let fileName = "latest.pdf";
-  if (cd) {
-    const match = cd.match(/filename="(.+)"/);
-    if (match && match[1]) fileName = match[1];
+  // 1. Fetch XLSX from Vercel
+  const resp = UrlFetchApp.fetch(url);
+  if (resp.getResponseCode() !== 200) {
+    throw new Error("Failed to fetch XLSX: " + resp.getContentText());
   }
+  const xlsxBlob = resp.getBlob().setName("latest.xlsx");
 
-  // Check if file already exists in folder
-  const files = folder.getFilesByName(fileName);
-  if (!files.hasNext()) {
-      // Save new file
-    const blob = resp.getBlob().setName(fileName);
-    folder.createFile(blob);
-  } else {
-    Logger.log(fileName + " already exists, skipping download.");
-  }
+  // 2. Prepare multipart payload correctly
+  const boundary = "-------314159265358979323846";
+  const delimiter = "\r\n--" + boundary + "\r\n";
+  const closeDelimiter = "\r\n--" + boundary + "--";
+
+  const metadata = {
+    name: "tempFile",
+    mimeType: "application/vnd.google-apps.spreadsheet"
+  };
+
+  const multipartRequestBody =
+    delimiter +
+    "Content-Type: application/json; charset=UTF-8\r\n\r\n" +
+    JSON.stringify(metadata) +
+    delimiter +
+    "Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\r\n\r\n";
+
+  // Combine multipart body properly using a blob
+  const combinedBlob = Utilities.newBlob(
+    multipartRequestBody,
+    "multipart/related; boundary=" + boundary
+  ).getBytes()
+    .concat(xlsxBlob.getBytes())
+    .concat(Utilities.newBlob(closeDelimiter).getBytes());
+
+  const options = {
+    method: "post",
+    contentType: "multipart/related; boundary=" + boundary,
+    headers: {
+      Authorization: "Bearer " + ScriptApp.getOAuthToken()
+    },
+    payload: combinedBlob,
+    muteHttpExceptions: true
+  };
+
+  // 3. Send to Drive API v3
+  const driveResponse = UrlFetchApp.fetch(
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+    options
+  );
+
+  const json = JSON.parse(driveResponse.getContentText());
+  if (!json.id) throw new Error("Drive API upload failed: " + driveResponse.getContentText());
+
+  const tempFileId = json.id;
+
+  // 4. Open converted temp spreadsheet
+  const tempSpreadsheet = SpreadsheetApp.openById(tempFileId);
+
+  // 5. Open master spreadsheet Taiwan IOTC Authorised Vessels
+  const masterSpreadsheet = SpreadsheetApp.openById("Your master copy spreedsheet");
+
+  // 6. Copy tabs to master if tab name doesn't exist
+  tempSpreadsheet.getSheets().forEach(sheet => {
+    const tabName = sheet.getName();
+    if (!masterSpreadsheet.getSheetByName(tabName)) {
+      sheet.copyTo(masterSpreadsheet).setName(tabName);
+      Logger.log("Added new tab: " + tabName);
+    } else {
+      Logger.log("Tab already exists, skipping: " + tabName);
+    }
+  });
+
+  // 7. Delete temporary sheet from Drive
+  DriveApp.getFileById(tempFileId).setTrashed(true);
 
 }
 
 /**
- * Creates a time-based trigger to run fetchFromVercel every day at 9AM
+ * Creates a time-based trigger to run updateVesselMasterSheet every day at 9AM
  */
 function createDailyTrigger() {
   // Remove previous triggers for this function
   const triggers = ScriptApp.getProjectTriggers();
   triggers.forEach(trigger => {
-    if (trigger.getHandlerFunction() === "fetchFromVercel") {
+    if (trigger.getHandlerFunction() === "updateVesselMasterSheet") {
       ScriptApp.deleteTrigger(trigger);
     }
   });
 
   // Create new daily trigger at 9AM
-  ScriptApp.newTrigger("fetchFromVercel")
+  ScriptApp.newTrigger("updateVesselMasterSheet")
     .timeBased()
     .everyDays(1)
     .atHour(9)

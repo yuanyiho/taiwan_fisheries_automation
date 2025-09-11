@@ -125,7 +125,7 @@ function updateVesselMasterSheet() {
   // 4. Open converted temp spreadsheet
   const tempSpreadsheet = SpreadsheetApp.openById(tempFileId);
 
-  // 5. Open master spreadsheet Taiwan IOTC Authorised Vessels
+  // 5. Open master spreadsheet
   const masterSpreadsheet = SpreadsheetApp.openById("Your master copy spreedsheet");
 
   // 6. Copy tabs to master if tab name doesn't exist
